@@ -3,6 +3,9 @@
 ## How to Play
 
 
-## Launch Server
-```cd server-io && npm run server```
-```cd client-vue-io && node index.js```
+## Run the Game  
+Run Socket io serveur:  
+```cd server-io && node index.js```  
+  
+Run Vue Client  
+```cd client-vue-io && npm run serve```  
