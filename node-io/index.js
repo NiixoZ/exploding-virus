@@ -7,13 +7,13 @@ const io = require('socket.io')(http, {
 });
 
 app.get('/', (req, res) => {
-  res.send('<h1>Hey Socket.io</h1>');
+  res.send('<h1>C\'est juste le serveur Socket bro.</h1>');
 });
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
+  console.log('A user connected, socketId: ' + socket.id);
   socket.on('disconnect', () => {
-    console.log('user disconnected');
+    console.log('A user disconnected, socketId' + socket.id);
   });
 });
 
