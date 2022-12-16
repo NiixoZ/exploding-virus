@@ -32,4 +32,6 @@ button {
     font-weight: 700;
     font-size: 20px;
     border-radius: 8px;
+    --webkit-user-select: none;
+    user-select: none;
 }

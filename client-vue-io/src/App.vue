@@ -16,28 +16,24 @@ export default {
 </script>
 -->
 <template>
-  <Lobby />
+    <Lobby />
 </template>
 
 <script>
-import SocketioService from './services/socketio.service.js';
 import Lobby from './components/Lobby.vue';
 
 export default {
-  name: 'App',
-  components: {
-    Lobby
-  },
-  created() {
-    SocketioService.setupSocketConnection();
-  }
+    name: 'App',
+    components: {
+        Lobby
+    }
 }
 </script>
 
 <style>
 body {
-  display: flex;
-  width: 100vw;
-  min-height: 100vh;
+    display: flex;
+    width: 100vw;
+    min-height: 100vh;
 }
 </style>
