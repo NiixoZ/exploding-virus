@@ -1,4 +1,11 @@
 @tailwind base;
+
+@layer base {
+    .content {
+        @apply w-[32rem] gap-4 flex flex-col;
+    }
+}
+
 @tailwind components;
 @tailwind utilities;
 
@@ -12,6 +19,11 @@ body {
     background-color: var(--background);
     color: #fff;
     font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
 }
 
 .bob {
@@ -25,7 +37,7 @@ input {
     border-radius: 8px;
 }
 
-button {
+.button {
     padding: 12px 32px;
     background: linear-gradient(91.92deg, #F7A92F 0%, #F16B1F 100%);
     color: #311903;
@@ -34,4 +46,16 @@ button {
     border-radius: 8px;
     --webkit-user-select: none;
     user-select: none;
+}
+
+.button-inactive {
+    padding: 12px 32px;
+    background: linear-gradient(91.92deg, #af8a4d 0%, #ac7251 100%);
+    color: #352a20;
+    font-weight: 700;
+    font-size: 20px;
+    border-radius: 8px;
+    --webkit-user-select: none;
+    user-select: none;
+    cursor: default;
 }

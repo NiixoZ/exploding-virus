@@ -5,11 +5,11 @@
         <div class="flex flex-row gap-12">
             <div class="flex flex-col gap-6">
                 <InputText label="Room Name" name="room-name" />
-                <button id="create-room" @click="createRoom">Create Room</button>
+                <button class="button" id="create-room" @click="createRoom">Create Room</button>
             </div>
             <div class="flex flex-col gap-6">
                 <InputText label="Room Code" name="room-code" />
-                <button id="join-room" @click="joinRoom">Join Room</button>
+                <button class="button" id="join-room" @click="joinRoom">Join Room</button>
             </div>
         </div>
     </div>
@@ -53,6 +53,7 @@ export default {
                 }
                 else {
                     let roomInfos = await Helper.getRoomInfos(SocketioService.roomCode);
+                    roomInfos.room_creator = true;
                     this1.$emit('change-view', {"view": 'Room', "props": roomInfos});
                 }
             }
@@ -82,6 +83,7 @@ export default {
             });
 
             let roomInfos = await Helper.getRoomInfos(code);
+            roomInfos.room_creator = false;
             this.$emit('change-view', {"view": 'Room', "props": roomInfos});
         }
     },
