@@ -10,5 +10,5 @@ function makeid(length) {
 }
 
 module.exports = {
-    makeid: makeid
+    makeid
 }

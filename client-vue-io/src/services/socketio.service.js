@@ -3,6 +3,7 @@ import { io } from 'socket.io-client';
 class SocketioService {
   socket;
   username;
+  roomCode;
   constructor() {}
 
   setupSocketConnection() {
@@ -14,6 +15,11 @@ class SocketioService {
 
     this.socket.on('disconnect', () => {
       console.log('Disconnected from socket.io server');
+    });
+
+    this.socket.on('room-created-code', (data) => {
+        this.roomCode = data;
+        console.log('room-created-code: ', this.roomCode);
     });
   }
 

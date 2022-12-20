@@ -2,12 +2,34 @@ const app = require('express')();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        origins: ['http://localhost:8080']
+        origins: ['http://localhost:8081']
     }
 });
 
+const Room = require('./assets/room.js');
+const User = require('./assets/user.js');
+let rooms = [];
+let users = [];
+
+function getRoom(roomCode) {
+    return rooms.find(room => room.code == roomCode);
+}
+
 app.get('/', (req, res) => {
     res.send('<h1>C\'est juste le serveur Socket bro.</h1>');
+});
+
+app.get('/room', (req, res) => {
+    if(req.query.roomCode !== '' || req.query.roomCode !== undefined || req.query.roomCode !== null) {
+        let room = getRoom(req.query.roomCode);
+        if(room !== undefined) {
+            res.setHeader('Access-Control-Allow-Origin', '*')
+            res.setHeader('Content-Type', 'application/json');
+            res.send(room.getInfos());
+            return;
+        }
+    }
+    res.send('Room not found');
 });
 
 io.on('connection', (socket) => {
@@ -25,7 +47,7 @@ io.on('connection', (socket) => {
 
 
     socket.on('join-room', (params) => {
-        if (params.roomName === '' || params.roomName === undefined || params.roomName === null) {
+        if (params.roomCode === '' || params.roomCode === undefined || params.roomCode === null) {
             socket.emit('error', 'Room name is required');
             return;
         }
@@ -34,10 +56,13 @@ io.on('connection', (socket) => {
             return;
         }
 
-        socket.join(params.roomName);
         console.log('username: ', params.username);
-        console.log('roomName: ', params.roomName);
-        socket.to(params.roomName).emit('new-user', params.username);
+        console.log('roomCode: ', params.roomCode);
+
+        let user = new User(socket, params.username);
+        let room = getRoom(params.roomCode);
+        room.addUser(user)
+        users.push(user);
     });
 
 
@@ -51,10 +76,17 @@ io.on('connection', (socket) => {
             return;
         }
 
-        socket.join(params.roomName);
         console.log('username: ', params.username);
         console.log('roomName: ', params.roomName);
-        socket.to(params.roomName).emit('new-user', params.username);
+        console.log('socket_id: ', socket.id);
+
+        let user = new User(socket, params.username);
+        let room = new Room(params.roomName, io);
+        room.addUser(user);
+        users.push(user);
+        rooms.push(room);
+
+        socket.emit('room-created-code', room.code);
     });
 
 });

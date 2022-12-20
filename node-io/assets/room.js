@@ -1,19 +1,34 @@
 const { Server } = require("socket.io");
-import makeid from './helper.js';
+const Helper = require('./helper.js');
 
 class Room {
-    constructor(roomName) {
+    constructor(roomName, io) {
         this.roomName = roomName;
-        this.code = makeid(6);
+        this.code = Helper.makeid(7);
         this.users = [];
         this.maxUsers = 4;
-        this.server = new Server();
+        this.io = io;
+        console.log('Room created: ', this.code);
     }
 
     addUser(user) {
+        if (this.users.length >= this.maxUsers) {
+            user.socket.emit('error', 'Room is full');
+            return;
+        }
+
         this.users.push(user);
-        user.socket.join(this.server);
-    }   
+        user.socket.join(this.code);
+        user.socket.to(this.code).emit('room-new-player', user.username);
+    }
+
+    getInfos() {
+        let users = [];
+        this.users.forEach(user => {
+            users.push(user.username);
+        });
+        return {users : users, roomName : this.roomName, roomCode : this.code};
+    }
 }
 
-export default Room;
+module.exports = Room;

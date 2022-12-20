@@ -15,48 +15,80 @@
     </div>
 </template>  
 
+
+
 <script>
 import InputText from './inputs/InputText.vue';
 import SocketioService from '../services/socketio.service.js';
+import Helper from '../js/helper.js'
 
 export default {
-    name: 'WebLobby',
+    name: 'GameLobby',
     components: {
         InputText
     },
-    created() {
-        SocketioService.setupSocketConnection();
-    },
-    beforeUnmount() {
-        SocketioService.disconnect();
-    },
     methods: {
-        createRoom() {
+        async createRoom() {
+            SocketioService.roomCode = undefined;
             let usernameInput = document.querySelector('#input-username');
             let roomNameInput = document.querySelector('#input-room-name');
             console.log('Create room button clicked');
             console.log('Username: ' + usernameInput.value);
             console.log('Room name: ' + roomNameInput.value);
 
+            if(usernameInput.value === '' || roomNameInput.value === '') {
+                console.log('Username or room name is empty');
+                return;
+            }
+
             SocketioService.socket.emit('create-room', {
                 username: usernameInput.value,
                 roomName: roomNameInput.value
             });
+
+            let this1 = this;
+            async function waitForElement(){
+                if(SocketioService.roomCode === undefined){
+                    setTimeout(waitForElement, 250);
+                }
+                else {
+                    let roomInfos = await Helper.getRoomInfos(SocketioService.roomCode);
+                    this1.$emit('change-view', {"view": 'Room', "props": roomInfos});
+                }
+            }
+            waitForElement();
+
         },
-        joinRoom() {
+        async joinRoom() {
+            SocketioService.roomCode = undefined;
             let usernameInput = document.querySelector('#input-username');
             let roomCodeInput = document.querySelector('#input-room-code');
+            
+            let username = usernameInput.value;
+            let code = roomCodeInput.value;
+
             console.log('Join room button clicked');
-            console.log('Username: ' + usernameInput.value);
-            console.log('Room code: ' + roomCodeInput.value);
+            console.log('Username: ' + username);
+            console.log('Room code: ' + code);
+
+            if(username === '' || code === '') {
+                console.log('Username or room name is empty');
+                return;
+            }
+
             SocketioService.socket.emit('join-room', {
-                username: usernameInput.value,
-                roomCode: roomCodeInput.value
+                username: username,
+                roomCode: code
             });
+
+            let roomInfos = await Helper.getRoomInfos(code);
+            this.$emit('change-view', {"view": 'Room', "props": roomInfos});
         }
     },
 }
 </script>
+
+
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
