@@ -59,3 +59,13 @@ input {
     user-select: none;
     cursor: default;
 }
+
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+    border-radius: 8px;
+    gap: 4px;
+}

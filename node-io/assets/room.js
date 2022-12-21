@@ -29,6 +29,7 @@ class Room {
             return;
         }
 
+
         let this1 = this;
         user.socket.on('disconnect', () => {
             console.log('User disconnected: ', user.username);
@@ -36,20 +37,36 @@ class Room {
             this1.io.to(this1.code).emit('room-player-left', user.username);
         });
 
+        // If all users are in game view, start the game
         user.socket.on('user-in-game-view', () => {
             console.log('User in game view: ', user.username);
             this1.userInView++;
+
             if(this1.userInView === this1.users.length) {
                 this1.nextUser(1);
+                this.deck = Helper.shuffle(this.deck.concat(Cards.bomb));
             }
+
             user.socket.emit('game-my-cards', user.cards);
         });
+
+
+        user.socket.on('user-pick-card', () => {
+            this1.userPickCard(user);
+        });
+
+
+        user.socket.on('user-play-card', (cardIndex) => {
+            this1.userPlayCard(user, cardIndex);
+        });
+
 
         this.users.push(user);
         user.room = this.code;
         user.socket.join(this.code);
         user.socket.to(this.code).emit('room-player-join', user.username);
     }
+    
 
     getLobbyInfos() {
         let users = [];
@@ -59,6 +76,7 @@ class Room {
         return {users : users, roomName : this.roomName, roomCode : this.code};
     }
 
+
     getGameInfos() {
         let users = [];
         this.users.forEach(user => {
@@ -67,11 +85,12 @@ class Room {
         return {users : users, currentUser: this.currentUser?.uuid, roomName : this.roomName, roomCode : this.code, deckSize: this.deck.length};
     }
 
+
     launchGame() {
         if(this.status === 'waiting') {
             console.log('Game started: \t', this.code);
             this.status = 'started';
-            this.deck = Helper.shuffle(Cards.cards.concat(Cards.bomb));
+            this.deck = Helper.shuffle(Cards.cards.slice());
             this.users.forEach(user => {
                 for(let i = 0; i < 5; i++) {
                     user.addCard(this.deck.shift());
@@ -80,6 +99,7 @@ class Room {
             this.io.to(this.code).emit('game-start', this.getGameInfos());
         }
     }
+
 
     userPlayCard(user, cardIndex) {
         if(this.currentUser.uuid !== user.uuid) {
@@ -92,19 +112,24 @@ class Room {
         }
         user.removeCard(cardIndex);
         this.io.to(this.code).emit('game-user-play-card', {user: user.uuid, card: cardIndex});
+    }
+
+
+    // User pick a card from the deck. 
+    // If the deck is empty, the game is already over
+    userPickCard(user) {
+        if(this.currentUser.uuid !== user.uuid) {
+            user.socket.emit('game-user-error', 'It\'s not your turn');
+            return;
+        }
+
+        let card = this.deck.shift();
+        user.addCard(card);
+
         this.currentUserNeedToPlayTimes--;
         if(this.currentUserNeedToPlayTimes === 0) {
             this.nextUser(1);
         }
-    }
-
-    userPickCard(user) {
-        if(this.deck.length === 0) {
-            user.socket.emit('game-user-need-replay', 'No more cards in deck');
-            return;
-        }
-        let card = this.deck.shift();
-        user.addCard(card);
     }
 
     nextUser(playTimes) {

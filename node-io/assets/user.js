@@ -23,8 +23,8 @@ class User {
 
     addCard(card) {
         this.cards.push(card);
-        this.io.to(this.room).emit('game-user-get-card', this.uuid);
-        this.socket.emit('game-add-card', card);
+        this.io.to(this.room).emit('game-user-pick-card', this.uuid);
+        this.socket.emit('game-user-add-card', card);
     }
 
     removeCard(cardIndex) {
