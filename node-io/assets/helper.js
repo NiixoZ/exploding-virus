@@ -9,6 +9,14 @@ function makeid(length) {
     return result;
 }
 
+function shuffle(arr) {
+    return Array(arr.length).fill(null)
+        .map((_, i) => [Math.random(), i])
+        .sort(([a], [b]) => a - b)
+        .map(([, i]) => arr[i])
+}
+
 module.exports = {
-    makeid
+    makeid,
+    shuffle
 }

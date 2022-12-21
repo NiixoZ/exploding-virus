@@ -19,7 +19,6 @@ class SocketioService {
 
     this.socket.on('room-created-code', (data) => {
         this.roomCode = data;
-        console.log('room-created-code: ', this.roomCode);
     });
   }
 

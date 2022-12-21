@@ -47,14 +47,24 @@ export default {
     },
     methods: {
         launchGame() {
-            SocketioService.socket.emit('launch-game');
-            console.log('launch-game');
+            SocketioService.socket.emit('user-launch-game');
+            console.log('user-launch-game');
         },
     },
     mounted() {
-        SocketioService.socket.on('room-new-player', (data) => {
+        SocketioService.socket.on('room-player-join', (data) => {
             document.querySelector('#players').innerHTML += `<li class="bob">${data}</li>`;
-            console.log('room-new-player: ', data);
+            console.log('room-player-join: ', data);
+        });
+
+        SocketioService.socket.on('room-player-left', (data) => {
+            console.log(document.querySelector('#players').innerHTML);
+            document.querySelector('#players').innerHTML = document.querySelector('#players').innerHTML.replace(`<li class="bob">${data}</li>`, '');
+        });
+
+        SocketioService.socket.on('game-start', (data) => {
+            console.log('start-game', data);
+            this.$emit('change-view', {"view": 'Game', "props": data});
         });
     },
 }

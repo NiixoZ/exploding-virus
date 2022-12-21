@@ -1,20 +1,3 @@
-<!--
-<template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
-</template>
-
-<script>
-import HelloWorld from './components/HelloWorld.vue'
-
-export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
-</script>
--->
 <template>
     <component :is="currentComponent" v-bind="viewProps" v-on:change-view="changeView"></component>
 </template>
@@ -22,12 +5,14 @@ export default {
 <script>
 import Lobby from './components/Lobby.vue';
 import Room from './components/Room.vue';
+import Game from './components/Game.vue';
 import SocketioService from './services/socketio.service.js';
 export default {
     name: 'App',
     components: {
         Lobby,
-        Room
+        Room,
+        Game
     },
     data() {
         return {
@@ -37,7 +22,7 @@ export default {
     },
     computed: {
         currentProperties: function() {
-            if (this.currentComponent === Room) {
+            if (this.currentComponent === Room || this.currentComponent === Game) {
                 return this.viewProps;
             }
             return {};

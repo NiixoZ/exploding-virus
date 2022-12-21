@@ -2,7 +2,7 @@
 
 @layer base {
     .content {
-        @apply w-[32rem] gap-4 flex flex-col;
+        @apply w-[32rem] gap-4 flex flex-col items-center;
     }
 }
 

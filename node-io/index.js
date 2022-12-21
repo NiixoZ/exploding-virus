@@ -25,7 +25,7 @@ app.get('/room', (req, res) => {
         if(room !== undefined) {
             res.setHeader('Access-Control-Allow-Origin', '*')
             res.setHeader('Content-Type', 'application/json');
-            res.send(room.getInfos());
+            res.send(room.getLobbyInfos());
             return;
         }
     }
@@ -59,7 +59,7 @@ io.on('connection', (socket) => {
         console.log('username: ', params.username);
         console.log('roomCode: ', params.roomCode);
 
-        let user = new User(socket, params.username);
+        let user = new User(socket, params.username, io);
         let room = getRoom(params.roomCode);
         room.addUser(user)
         users.push(user);
@@ -80,7 +80,7 @@ io.on('connection', (socket) => {
         console.log('roomName: ', params.roomName);
         console.log('socket_id: ', socket.id);
 
-        let user = new User(socket, params.username);
+        let user = new User(socket, params.username, io);
         let room = new Room(params.roomName, io);
         room.addUser(user);
         users.push(user);
