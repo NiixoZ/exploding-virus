@@ -10,9 +10,11 @@ class Room {
         this.owner = null;
         this.io = io;
         this.status = 'waiting';
+
         this.currentUser = null;
         this.currentUserNeedToPlayTimes = 0;
         this.deck = [];
+        this.discardedCards = [];
         this.userInView = 0;
         console.log('Room created: ', this.code);
     }
@@ -97,10 +99,15 @@ class Room {
                 }
             });
             this.io.to(this.code).emit('game-start', this.getGameInfos());
+
+            this.users.forEach(user => {
+                user.socket.emit('game-my-cards', user.cards);
+            });
         }
     }
 
 
+    // User play a card at cardIndex from his hand
     userPlayCard(user, cardIndex) {
         console.log('User play card: ', user.username, user.uuid, cardIndex);
         if(this.currentUser.uuid !== user.uuid) {
@@ -112,8 +119,9 @@ class Room {
             return;
         }
         let card = user.removeCard(cardIndex);
-        this.io.to(this.code).emit('game-user-play-card', {card: card, uuid: user.uuid});
-        user.socket.emit('game-my-cards', user.cards);
+        this.discardedCards.push(card);
+
+        this.updateBoardInfos('play', card, user);
     }
 
 
@@ -132,6 +140,8 @@ class Room {
         if(this.currentUserNeedToPlayTimes === 0) {
             this.nextUser(1);
         }
+
+        this.updateBoardInfos('pick', undefined, user);
     }
 
     nextUser(playTimes) {
@@ -155,6 +165,30 @@ class Room {
             }
         });
         return user;
+    }
+
+    updateBoardInfos(type, playedCard, user) {
+        let userCards = [];
+        this.users.forEach(user => {
+            userCards.push({uuid : user.uuid, cardsNumber : user.cards.length});
+        });
+
+        // Send board infos to all players
+        this.io.to(this.code).emit('game-update-board', 
+            {
+                updateType:     type,
+                deckSize:       this.deck.length,
+                discardSize:    this.discardedCards.length, 
+                actionPlayer:   user.uuid,
+                playerTurn:     this.currentUser.uuid,
+                playedCard:     playedCard, 
+                userCards:      userCards
+            });
+
+        // Send cards for each players
+        this.users.forEach(user => {
+            user.socket.emit('game-my-cards', user.cards);
+        });
     }
 
     shuffleCards() {

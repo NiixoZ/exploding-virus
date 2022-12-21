@@ -99,34 +99,29 @@ export default {
         });
 
 
-        SocketioService.socket.on('game-user-turn', (data) => {
-            console.log('game-user-turn: ', data);
-            let user = getUserForUUID(data);
-            console.log('game-user-turn: ', user);
-            document.querySelector('#turn-info').innerHTML = `It is ${user.username}'s turn`;
-        });
-
-
         SocketioService.socket.on('game-user-error', (data) => {
             console.log('game-user-error: ', data);
         });
 
 
-        SocketioService.socket.on('game-user-pick-card', (uuid) => {
-            addCardToUser(getUserForUUID(uuid));
+        SocketioService.socket.on('game-update-board', (data) => {
+            console.log('game-update-board: ', data);
+
+            // Update player Turn Bar
+            let user = getUserForUUID(data.playerTurn);
+            document.querySelector('#turn-info').innerHTML = `It is ${user.username}'s turn`;
+
+            if(data.updateType === 'pick') {
+
+                // Update player card
+                addCardToUser(getUserForUUID(data.actionPlayer));
+            }
+            else if(data.updateType === 'play') {
+
+                // Update player card
+                removeCardFromUser(getUserForUUID(data.actionPlayer));
+            }
         });
-
-
-        SocketioService.socket.on('game-user-add-card', (card) => {
-            addCardToList(card);
-        });
-
-
-        SocketioService.socket.on('game-user-play-card', (data) => {
-            console.log('game-user-play-card: ', data.card, data.uuid);
-            removeCardFromUser(getUserForUUID(data.uuid));
-        });
-
 
         document.querySelector('#card-number').innerHTML = '';
         this.$props.users.forEach(u => {
