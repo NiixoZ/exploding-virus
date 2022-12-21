@@ -83,6 +83,12 @@ export default {
             spanCount.innerHTML = user.cardsNumber;
         }
 
+        function removeCardFromUser(user) {
+            let spanCount = document.querySelector(`[id='${user.uuid}'] .card-count`);
+            user.cardsNumber--;
+            spanCount.innerHTML = user.cardsNumber;
+        }
+
         SocketioService.socket.on('game-my-cards', (cards) => {
             console.log('game-my-cards: ', cards);
             
@@ -116,10 +122,17 @@ export default {
         });
 
 
+        SocketioService.socket.on('game-user-play-card', (data) => {
+            console.log('game-user-play-card: ', data.card, data.uuid);
+            removeCardFromUser(getUserForUUID(data.uuid));
+        });
+
+
         document.querySelector('#card-number').innerHTML = '';
         this.$props.users.forEach(u => {
             addCardNumber(u);
         });
+
         SocketioService.socket.emit('user-in-game-view', {});
     },
 }

@@ -28,9 +28,11 @@ class User {
     }
 
     removeCard(cardIndex) {
-        this.cards.splice(cardIndex, 1);
+        // Remove and return the card at the specified index
+        let card = this.cards.splice(cardIndex, 1);
         this.io.to(this.room).emit('game-user-remove-card', this.uuid);
         this.socket.emit('game-remove-card', cardIndex);
+        return card[0];
     }
     
 }
