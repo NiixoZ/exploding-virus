@@ -6,6 +6,8 @@ const io = require('socket.io')(http, {
     }
 });
 
+const fs = require('fs');
+
 const Room = require('./assets/room.js');
 const User = require('./assets/user.js');
 let rooms = [];
@@ -31,6 +33,27 @@ app.get('/room', (req, res) => {
     }
     res.send('Room not found');
 });
+
+
+app.get('/card', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Content-Type', 'image/png');
+    if(req.query.cardId !== '' && req.query.cardId !== undefined && req.query.cardId !== null) {
+        if(fs.existsSync(__dirname + '/assets/img/cards/' + req.query.cardId + '.png')) {
+            res.sendFile(__dirname + '/assets/img/cards/' + req.query.cardId + '.png');
+            return;
+        }
+    }
+    res.sendFile(__dirname + '/assets/img/cards/0.png');
+    return;
+});
+
+
+
+
+
+
+
 
 io.on('connection', (socket) => {
     console.log('A user connected, socketId: ', socket.id);
