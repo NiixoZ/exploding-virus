@@ -83,8 +83,13 @@ const defuse = [
     new Card(56, '3am Flatulence', 'defuse', 'Permet de désamorcer une bombe', '#FF0000'),
 ];
 
+function getCardForId(id) {
+    return cards.find(card => card.id === id);
+}
+
 module.exports = {
     cards,
     bomb,
-    defuse
+    defuse,
+    getCardForId,
 };

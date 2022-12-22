@@ -108,35 +108,43 @@ class Room {
     }
 
 
-    // User play a card at cardIndex from his hand
+    // User play a card from his hand
     userPlayCard(user, cardId) {
+        let card = Cards.getCardForId(cardId);
         console.log('User play card: ', user.username, user.uuid, cardId);
-        if(this.currentUser.uuid !== user.uuid && this.card.type !== 'nope') {
+        
+        if(card !== undefined && card !== '' && card !== null) {
+            user.socket.emit('game-user-error', 'This card doesn\'t exist');
+            return;
+        }
+
+        if(this.currentUser.uuid !== user.uuid && card.type !== 'nope') {
             user.socket.emit('game-user-error', 'It\'s not your turn');
             return;
         }
-        let card = user.removeCard(cardId);
+
+        user.removeCard(cardId);
         if(card === null || card === undefined || card === '') {
             user.socket.emit('game-user-error', 'You don\'t have this card');
             return;
         }
 
-        if(card === 'skip') {
+        if(card.type === 'skip') {
             this.nextUser(1);
         }
-        else if(card === 'attack') {
+        else if(card.type === 'attack') {
             this.nextUser(2);
         }
-        else if(card === 'favor') {
+        else if(card.type === 'favor') {
         }
-        else if(card === 'shuffle') {
+        else if(card.type === 'shuffle') {
             this.shuffleCards();
         }
-        else if(card === 'see_the_future') {
+        else if(card.type === 'see_the_future') {
         }
-        else if(card === 'defuse') {
+        else if(card.type === 'defuse') {
         }
-        else if(card === 'nope') {
+        else if(card.type === 'nope') {
         }
 
         this.discardedCards.push(card);
@@ -212,7 +220,7 @@ class Room {
     }
 
     shuffleCards() {
-        this.cards = Helper.shuffle(this.cards);
+        this.cards = Helper.shuffle(this.deck);
     }
 }
 
