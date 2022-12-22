@@ -47,6 +47,7 @@ class Room {
             if(this1.userInView === this1.users.length) {
                 this1.nextUser(1);
                 this.deck = Helper.shuffle(this.deck.concat(Cards.bomb));
+                this.updateBoardInfos('start', undefined, undefined);
             }
 
             user.socket.emit('game-my-cards', user.cards);
@@ -110,7 +111,7 @@ class Room {
     // User play a card at cardIndex from his hand
     userPlayCard(user, cardId) {
         console.log('User play card: ', user.username, user.uuid, cardId);
-        if(this.currentUser.uuid !== user.uuid) {
+        if(this.currentUser.uuid !== user.uuid && this.card.type !== 'nope') {
             user.socket.emit('game-user-error', 'It\'s not your turn');
             return;
         }
@@ -118,6 +119,24 @@ class Room {
         if(card === null || card === undefined || card === '') {
             user.socket.emit('game-user-error', 'You don\'t have this card');
             return;
+        }
+
+        if(card === 'skip') {
+            this.nextUser(1);
+        }
+        else if(card === 'attack') {
+            this.nextUser(2);
+        }
+        else if(card === 'favor') {
+        }
+        else if(card === 'shuffle') {
+            this.shuffleCards();
+        }
+        else if(card === 'see_the_future') {
+        }
+        else if(card === 'defuse') {
+        }
+        else if(card === 'nope') {
         }
 
         this.discardedCards.push(card);
@@ -180,7 +199,7 @@ class Room {
                 updateType:     type,
                 deckSize:       this.deck.length,
                 discardSize:    this.discardedCards.length, 
-                actionPlayer:   user.uuid,
+                actionPlayer:   user?.uuid,
                 playerTurn:     this.currentUser.uuid,
                 playedCard:     playedCard, 
                 userCards:      userCards

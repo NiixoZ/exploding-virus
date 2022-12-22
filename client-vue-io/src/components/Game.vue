@@ -10,10 +10,10 @@
         </div>
 
         <div id="center">
-            <div id="discard" class="bob">
+            <div id="discard">
 
             </div>
-            <div id="deck" class="bob">
+            <div id="deck" v-on:click="pickCard">
 
             </div>
         </div>
@@ -21,7 +21,6 @@
         <div id="bottom">
             <ul id="my-cards"></ul>
             <div id="buttons-list">
-                <button class="button" v-on:click="pickCard">Piocher</button>
                 <button class="button" v-on:click="playCard">Jouer</button>
             </div>
         </div>
@@ -30,6 +29,9 @@
 
 <script>
 import SocketioService from '../services/socketio.service.js';
+
+let discardSize = 0;
+let deckSize = 0;
 
 export default {
     name: 'GameGame',
@@ -127,9 +129,21 @@ export default {
             if(direction === 1) {
                 rotation = -rotation;
             }
-            img.style.transform = 'rotate(' + rotation + 'deg)';
-            img.style.position = 'absolute';
+            img.style.transform = 'rotate(' + rotation + 'deg) rotateX(48deg) rotateZ(20deg) translateY(-' + 3*discardSize + 'px) translateX(-' + discardSize + 'px)';
             document.querySelector('#discard').appendChild(img);
+        }
+
+        function updateDeck() {
+            document.querySelector('#deck').innerHTML = '';
+            for(let i = 0; i < deckSize; i++) {
+                let img = document.createElement('img');
+                img.src = process.env.VUE_APP_SOCKET_ENDPOINT + '/card?cardId=0';
+                img.width = '200';
+                img.classList.add('card'); 
+                img.draggable = false;
+                img.style.transform = 'rotateX(48deg) rotateZ(20deg) translateY(-' + 3*i + 'px) translateX(-' + i + 'px)';
+                document.querySelector('#deck').appendChild(img);
+            }
         }
 
         SocketioService.socket.on('game-my-cards', (cards) => {
@@ -152,6 +166,9 @@ export default {
 
             // Update player Turn Bar
             let user = getUserForUUID(data.playerTurn);
+            deckSize = data.deckSize;
+            discardSize = data.discardSize;
+
             document.querySelector('#turn-info').innerHTML = `It is ${user.username}'s turn`;
 
             if(data.updateType === 'pick') {
@@ -165,12 +182,47 @@ export default {
                 removeCardFromUser(getUserForUUID(data.actionPlayer));
                 addCardToDiscard(data.playedCard);
             }
+
+            updateDeck();
         });
 
+
+        // Setup card Number
         document.querySelector('#card-number').innerHTML = '';
         this.$props.users.forEach(u => {
             addCardNumber(u);
         });
+
+
+        // Setup Horizontal Drag Scroll
+        const slider = document.querySelector('#my-cards');
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        slider.addEventListener('mousedown', (e) => {
+            isDown = true;
+            slider.classList.add('active');
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+        slider.addEventListener('mouseleave', () => {
+            isDown = false;
+            slider.classList.remove('active');
+        });
+        slider.addEventListener('mouseup', () => {
+            isDown = false;
+            slider.classList.remove('active');
+        });
+        slider.addEventListener('mousemove', (e) => {
+            if(!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX);
+            slider.scrollLeft = scrollLeft - walk;
+            console.log(walk);
+        });
+
 
         SocketioService.socket.emit('user-in-game-view', {});
     },
@@ -205,16 +257,12 @@ export default {
     padding: 3rem 3rem;
     overflow: visible;
     overflow-x: scroll;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
-#my-cards img {
-    width: 2rem;
-    user-drag: none; 
-    user-select: none;
-    -moz-user-select: none;
-    -webkit-user-drag: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
+#my-cards::-webkit-scrollbar { /* WebKit */
+    display: none;
 }
 
 #my-cards li {
@@ -235,25 +283,15 @@ export default {
 
 #center {
     display: flex;
-    gap: 10px;
+    gap: 120px;
 }
 
 #discard, #deck {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    width: 24rem;
-    height: 20rem;
-}
-
-#discard {
-    position: relative;
-}
-
-#discard img {
-    position: absolute;
-    top: 0;
-    left: 0;
+    width: 12rem;
+    height: 16rem;
 }
 
 </style>

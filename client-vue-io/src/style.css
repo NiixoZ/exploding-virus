@@ -81,3 +81,23 @@ img.card:not(.card-selected) {
     filter: drop-shadow(0px 0px 3px rgba(238, 100, 22, 0.75))
             drop-shadow(0px 0px 9px rgba(254, 235, 65, 0.8));
 }
+
+img {
+    user-drag: none; 
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+#discard img.card {
+    bottom: 0;
+    position: absolute;
+}
+
+#deck img.card {
+    bottom: 0;
+    right: 0;
+    position: absolute;
+}
