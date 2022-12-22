@@ -108,17 +108,18 @@ class Room {
 
 
     // User play a card at cardIndex from his hand
-    userPlayCard(user, cardIndex) {
-        console.log('User play card: ', user.username, user.uuid, cardIndex);
+    userPlayCard(user, cardId) {
+        console.log('User play card: ', user.username, user.uuid, cardId);
         if(this.currentUser.uuid !== user.uuid) {
             user.socket.emit('game-user-error', 'It\'s not your turn');
             return;
         }
-        if(cardIndex < 0 && user.cards.length >= cardIndex) {
-            user.socket.emit('game-user-need-replay', 'Invalid card index');
+        let card = user.removeCard(cardId);
+        if(card === null || card === undefined || card === '') {
+            user.socket.emit('game-user-error', 'You don\'t have this card');
             return;
         }
-        let card = user.removeCard(cardIndex);
+
         this.discardedCards.push(card);
 
         this.updateBoardInfos('play', card, user);

@@ -23,7 +23,9 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    width: 100%;
+    max-height: 100vh;
+    width: 100vw;
+    overflow-x: hidden;
 }
 
 .bob {
@@ -60,12 +62,22 @@ input {
     cursor: default;
 }
 
-.card {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 8px;
-    border-radius: 8px;
-    gap: 4px;
+
+img.card {
+    cursor: pointer;
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+    margin: 0px -14px;
+}
+
+img.card:not(.card-selected) {
+    filter: drop-shadow(-4px 0px 4px rgba(0, 0, 0, 0.5));
+}
+
+.card-selected {
+    z-index: 100;
+    scale: 1.15;
+    filter: drop-shadow(0px 0px 3px rgba(238, 100, 22, 0.75))
+            drop-shadow(0px 0px 9px rgba(254, 235, 65, 0.8));
 }

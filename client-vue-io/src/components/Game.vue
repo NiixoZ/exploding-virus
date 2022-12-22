@@ -1,17 +1,30 @@
 <template>
     <div class="content">
-        <div id="room-name">{{ roomName }}</div>
-        <div id="turn-info"></div>
-        <div>
-            Cards number:
-            <ul id="card-number"></ul>
+        <div id="top">
+            <div id="room-name">{{ roomName }}</div>
+            <div id="turn-info"></div>
+            <div>
+                Cards number:
+                <ul id="card-number"></ul>
+            </div>
         </div>
-        <div>
-            My Cards:
+
+        <div id="center">
+            <div id="discard" class="bob">
+
+            </div>
+            <div id="deck" class="bob">
+
+            </div>
+        </div>
+
+        <div id="bottom">
             <ul id="my-cards"></ul>
+            <div id="buttons-list">
+                <button class="button" v-on:click="pickCard">Piocher</button>
+                <button class="button" v-on:click="playCard">Jouer</button>
+            </div>
         </div>
-        <button class="button" v-on:click="pickCard">Piocher</button>
-        <button class="button" v-on:click="playCard(0)">Jouer</button>
     </div>
 </template>
 
@@ -35,7 +48,12 @@ export default {
             SocketioService.socket.emit('user-pick-card', {});
             console.log('user-pick-card');
         },
-        playCard(cardNumber) {
+        playCard() {
+            let selectedCard = document.querySelector('.card-selected');
+            if(selectedCard === null) {
+                return;
+            }
+            let cardNumber = selectedCard.id.split('-')[1];
             SocketioService.socket.emit('user-play-card', cardNumber);
             console.log('user-play-card: ', cardNumber);
         }
@@ -54,14 +72,20 @@ export default {
         }
 
         function addCardToList(card) {
-            let li = document.createElement('li');
-            let spanId = document.createElement('span');
-            let spanType = document.createElement('span');
-            spanId.innerHTML = card.id;
-            spanType.innerHTML = card.type;
-            li.classList.add('card', 'bob');
-            li.innerHTML = spanId.outerHTML + spanType.outerHTML;
-            document.querySelector('#my-cards').appendChild(li);
+            let img = document.createElement('img');
+            img.id = 'card-' + card.id;
+            img.src = process.env.VUE_APP_SOCKET_ENDPOINT + '/card?cardId=' + card.id;
+            img.width = '200';
+            img.classList.add('card'); 
+            img.draggable = false;
+            img.addEventListener('click', function() {
+                let selectedCards = document.querySelectorAll('.card-selected');
+                selectedCards.forEach(c => {
+                    c.classList.remove('card-selected');
+                });
+                this.classList.add('card-selected');
+            });
+            document.querySelector('#my-cards').appendChild(img);
         }
 
         function addCardNumber(user) {
@@ -87,6 +111,25 @@ export default {
             let spanCount = document.querySelector(`[id='${user.uuid}'] .card-count`);
             user.cardsNumber--;
             spanCount.innerHTML = user.cardsNumber;
+        }
+
+        function addCardToDiscard(card) {
+            let img = document.createElement('img');
+            img.id = 'card-' + card.id;
+            img.src = process.env.VUE_APP_SOCKET_ENDPOINT + '/card?cardId=' + card.id;
+            img.width = '200';
+            img.classList.add('card'); 
+            img.draggable = false;
+            // get random rotation
+            let rotation = Math.floor(Math.random() * 15);
+            // get random direction
+            let direction = Math.floor(Math.random() * 2);
+            if(direction === 1) {
+                rotation = -rotation;
+            }
+            img.style.transform = 'rotate(' + rotation + 'deg)';
+            img.style.position = 'absolute';
+            document.querySelector('#discard').appendChild(img);
         }
 
         SocketioService.socket.on('game-my-cards', (cards) => {
@@ -120,6 +163,7 @@ export default {
 
                 // Update player card
                 removeCardFromUser(getUserForUUID(data.actionPlayer));
+                addCardToDiscard(data.playedCard);
             }
         });
 
@@ -139,15 +183,38 @@ export default {
 .content {
     width: 100%;
     height: 100%;
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-#my-cards , #card-number {
+#my-cards , #card-number, #buttons-list {
     list-style-type: none;
     margin: 0;
     padding: 0;
     display: flex;
-    flex-wrap: wrap;
     gap: 8px;
+    overflow-x: auto;
+}
+
+#my-cards {
+    width: 100vw;
+    left: 0;
+    bottom: 0;
+    padding: 3rem 3rem;
+    overflow: visible;
+    overflow-x: scroll;
+}
+
+#my-cards img {
+    width: 2rem;
+    user-drag: none; 
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
 }
 
 #my-cards li {
@@ -156,6 +223,37 @@ export default {
     background-color: #3a3a3a;
     color: white;
     padding: 6px;
+}
+
+#top, #bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+#center {
+    display: flex;
+    gap: 10px;
+}
+
+#discard, #deck {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 24rem;
+    height: 20rem;
+}
+
+#discard {
+    position: relative;
+}
+
+#discard img {
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 </style>

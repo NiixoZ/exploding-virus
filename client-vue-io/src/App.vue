@@ -44,9 +44,4 @@ export default {
 </script>
 
 <style>
-body {
-    display: flex;
-    width: 100vw;
-    min-height: 100vh;
-}
 </style>
