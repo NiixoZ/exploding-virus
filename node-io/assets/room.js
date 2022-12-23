@@ -13,11 +13,13 @@ class Room {
 
         this.currentUser = null;
         this.currentUserNeedToPlayTimes = 0;
+        this.nextUserNeedToPlayTimes = 1;
         this.deck = [];
         this.discardedCards = [];
         this.userInView = 0;
         console.log('Room created: ', this.code);
     }
+
 
     addUser(user) {
         if(this.owner === null) {
@@ -113,38 +115,44 @@ class Room {
         let card = Cards.getCardForId(cardId);
         console.log('User play card: ', user.username, user.uuid, cardId);
         
-        if(card !== undefined && card !== '' && card !== null) {
+        if(card === undefined || card === '' || card === null) {
             user.socket.emit('game-user-error', 'This card doesn\'t exist');
             return;
         }
+
 
         if(this.currentUser.uuid !== user.uuid && card.type !== 'nope') {
             user.socket.emit('game-user-error', 'It\'s not your turn');
             return;
         }
 
-        user.removeCard(cardId);
+        card = user.removeCard(cardId);
         if(card === null || card === undefined || card === '') {
             user.socket.emit('game-user-error', 'You don\'t have this card');
             return;
         }
 
         if(card.type === 'skip') {
-            this.nextUser(1);
+            this.currentPlayerPlay();
         }
         else if(card.type === 'attack') {
-            this.nextUser(2);
+            this.nextUserNeedToPlayTimes++;
+            this.currentPlayerPlay();
         }
         else if(card.type === 'favor') {
+
         }
         else if(card.type === 'shuffle') {
             this.shuffleCards();
         }
         else if(card.type === 'see_the_future') {
+            user.socket.emit('game-user-see-the-future', this.deck.slice(0, 3));
         }
         else if(card.type === 'defuse') {
+
         }
         else if(card.type === 'nope') {
+
         }
 
         this.discardedCards.push(card);
@@ -164,13 +172,11 @@ class Room {
         let card = this.deck.shift();
         user.addCard(card);
 
-        this.currentUserNeedToPlayTimes--;
-        if(this.currentUserNeedToPlayTimes === 0) {
-            this.nextUser(1);
-        }
-
         this.updateBoardInfos('pick', undefined, user);
+
+        this.currentPlayerPlay();
     }
+
 
     nextUser(playTimes) {
         let index = this.users.indexOf(this.currentUser);
@@ -185,6 +191,7 @@ class Room {
         // TODO
     }
 
+
     getUserForUUID(uuid) {
         let user = null;
         this.users.forEach(u => {
@@ -194,6 +201,16 @@ class Room {
         });
         return user;
     }
+
+
+    currentPlayerPlay() {
+        this.currentUserNeedToPlayTimes--;
+        if(this.currentUserNeedToPlayTimes === 0) {
+            this.nextUser(this.nextUserNeedToPlayTimes);
+            this.nextUserNeedToPlayTimes = 1;
+        }
+    }
+
 
     updateBoardInfos(type, playedCard, user) {
         let userCards = [];
@@ -219,8 +236,9 @@ class Room {
         });
     }
 
+
     shuffleCards() {
-        this.cards = Helper.shuffle(this.deck);
+        this.deck = Helper.shuffle(this.deck);
     }
 }
 

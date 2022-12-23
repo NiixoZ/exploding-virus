@@ -187,6 +187,13 @@ export default {
         });
 
 
+        // User see the future
+        SocketioService.socket.on('game-user-see-the-future', (data) => {
+            console.log('game-user-see-the-future: ', data);
+        });
+
+
+
         // Setup card Number
         document.querySelector('#card-number').innerHTML = '';
         this.$props.users.forEach(u => {
@@ -220,7 +227,6 @@ export default {
             const x = e.pageX - slider.offsetLeft;
             const walk = (x - startX);
             slider.scrollLeft = scrollLeft - walk;
-            console.log(walk);
         });
 
 

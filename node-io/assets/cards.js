@@ -84,7 +84,11 @@ const defuse = [
 ];
 
 function getCardForId(id) {
-    return cards.find(card => card.id === id);
+    let card = cards.find(card => card.id == id);
+    if (!card) {
+        card = defuse.find(card => card.id == id);
+    }
+    return card;
 }
 
 module.exports = {
