@@ -19,6 +19,7 @@ class Room {
         this.userInView = 0;
         this.virus = undefined;
         console.log('Room created: ', this.code);
+
     }
 
 
@@ -163,6 +164,7 @@ class Room {
 
         }
         else if(card.type === 'shuffle') {
+            this.deck;
             this.shuffleCards();
         }
         else if(card.type === 'see_the_future') {
@@ -177,7 +179,6 @@ class Room {
         }
 
         this.discardedCards.push(card);
-
         this.updateBoardInfos('play', card, user);
     }
 
@@ -211,7 +212,6 @@ class Room {
         }
     }
 
-
     nextUser(playTimes) {
         let index = this.users.indexOf(this.currentUser);
         if(index === this.users.length - 1) {
@@ -221,8 +221,17 @@ class Room {
         }
         this.io.to(this.code).emit('game-player-turn', this.currentUser.uuid);
         this.currentUserNeedToPlayTimes = playTimes;
+    }
 
-        // TODO
+
+    previousUser() {
+        let index = this.users.indexOf(this.currentUser);
+        if(index === 0) {
+            this.currentUser = this.users[this.users.length - 1];
+        } else {
+            this.currentUser = this.users[index - 1];
+        }
+        this.io.to(this.code).emit('game-player-turn', this.currentUser.uuid);
     }
 
 
