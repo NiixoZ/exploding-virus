@@ -50,11 +50,6 @@ app.get('/card', (req, res) => {
 
 
 
-
-
-
-
-
 io.on('connection', (socket) => {
     console.log('A user connected, socketId: ', socket.id);
 

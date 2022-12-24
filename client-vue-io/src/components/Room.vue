@@ -1,16 +1,16 @@
 <template>
-    <div class="content justify-center">
-        <div>
+    <div class="flex align-center justify-center flex-col gap-6 w-[256px] sm:w-[512px]">
+        <div class="w-full">
             <div class="font-bold">Room</div>
             <div class="bob flex-grow text-center">{{ roomName }}</div>
         </div>
 
-        <div>
+        <div class="w-full">
             <div class="font-bold">Code</div>
             <div class="bob flex-grow text-center">{{ roomCode }}</div>
         </div>
 
-        <div>
+        <div class="w-full">
             <div class="font-bold">Users</div>
             <ul id="players" class="gap-2 flex flex-col">
                 <li class="bob" v-for="(user, index) in users"  v-bind:key="index">{{ user }}</li>

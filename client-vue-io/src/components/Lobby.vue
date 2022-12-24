@@ -1,13 +1,13 @@
 <template>
     <div class="content gap-6 justify-center">
-        <img alt="Virus Logo" src="../assets/logo.png" width="256">
+        <img class="logo w-[180px] sm:w-[256px]" alt="Virus Logo" src="../assets/logo.png">
         <InputText label="Username" name="username" />
-        <div class="flex flex-row gap-12">
-            <div class="flex flex-col gap-6">
+        <div class="flex flex-col sm:flex-row gap-6 sm:gap-12">
+            <div class="flex flex-col gap-3 sm:gap-6">
                 <InputText label="Room Name" name="room-name" />
                 <button class="button" id="create-room" @click="createRoom">Create Room</button>
             </div>
-            <div class="flex flex-col gap-6">
+            <div class="flex flex-col gap-3 sm:gap-6">
                 <InputText label="Room Code" name="room-code" />
                 <button class="button" id="join-room" @click="joinRoom">Join Room</button>
             </div>

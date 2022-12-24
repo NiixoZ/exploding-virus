@@ -4,6 +4,14 @@
     .content {
         @apply w-[32rem] gap-4 flex flex-col items-center;
     }
+
+    .bob {
+        @apply p-2 sm:p-3 text-base sm:text-lg;
+    }
+
+    .button {
+        @apply px-6 py-3 text-base sm:px-10 sm:py-4 sm:text-lg;
+    }
 }
 
 @tailwind components;
@@ -37,7 +45,6 @@ body {
     background-color: #1C1F23;
     border: 1px solid #24262B;
     border-radius: 8px;
-    padding: 12px;
 }
 
 input {
@@ -45,11 +52,9 @@ input {
 }
 
 .button {
-    padding: 12px 32px;
     background: linear-gradient(91.92deg, #F7A92F 0%, #F16B1F 100%);
     color: #311903;
     font-weight: 700;
-    font-size: 20px;
     border-radius: 8px;
     --webkit-user-select: none;
     user-select: none;
@@ -111,7 +116,7 @@ img {
 
 .content {
     width: 100%;
-    height: 100%;
+    height: 100vh;
     overflow: hidden;
     max-height: 100vh;
     display: flex;
