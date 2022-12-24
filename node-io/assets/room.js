@@ -40,6 +40,9 @@ class Room {
             console.log('User disconnected: ', user.username);
             this1.users.splice(this1.users.indexOf(user), 1);
             this1.io.to(this1.code).emit('room-player-left', user.username);
+            if(this.status === 'started') {
+                this1.playerLose(user);
+            }
         });
 
         // If all users are in game view, start the game
