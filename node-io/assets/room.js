@@ -26,7 +26,8 @@ class Room {
         if(this.owner === null) {
             this.owner = user;
             this.owner.socket.on('user-launch-game', () => {
-                this.launchGame();
+                if(this.users.length >= 2)
+                    this.launchGame();
             });
         }
         if (this.users.length >= this.maxUsers) {
