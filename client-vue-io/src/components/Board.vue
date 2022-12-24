@@ -32,7 +32,7 @@ let discardSize = 0;
 let deckSize = 0;
 
 export default {
-    name: 'GameGame',
+    name: 'GameBoard',
     props: {
         roomName: {
             type: String,

@@ -5,7 +5,7 @@
 <script>
 import Lobby from './components/Lobby.vue';
 import Room from './components/Room.vue';
-import Game from './components/Game.vue';
+import Game from './components/Board.vue';
 import SocketioService from './services/socketio.service.js';
 export default {
     name: 'App',
