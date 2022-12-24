@@ -117,24 +117,24 @@ class Room {
         console.log('User play card: ', user.username, user.uuid, cardId);
         
         if(card === undefined || card === '' || card === null) {
-            user.socket.emit('game-user-error', 'This card doesn\'t exist');
+            user.socket.emit('game-player-error', 'This card doesn\'t exist');
             return;
         }
 
 
         if(this.currentUser.uuid !== user.uuid && card.type !== 'nope') {
-            user.socket.emit('game-user-error', 'It\'s not your turn');
+            user.socket.emit('game-player-error', 'It\'s not your turn');
             return;
         }
 
         if(this.isVirusActive && card.type !== 'defuse') {
-            user.socket.emit('game-user-error', 'You need to defuse the virus');
+            user.socket.emit('game-player-error', 'You need to defuse the virus');
             return;
         }
 
         card = user.removeCard(cardId);
         if(card === null || card === undefined || card === '') {
-            user.socket.emit('game-user-error', 'You don\'t have this card');
+            user.socket.emit('game-player-error', 'You don\'t have this card');
             return;
         }
 
@@ -152,7 +152,7 @@ class Room {
             this.shuffleCards();
         }
         else if(card.type === 'see_the_future') {
-            user.socket.emit('game-user-see-the-future', this.deck.slice(0, 3));
+            user.socket.emit('game-player-see-the-future', this.deck.slice(0, 3));
         }
         else if(card.type === 'defuse') {
             this.isVirusActive = false;
@@ -172,7 +172,7 @@ class Room {
     // If the deck is empty, the game is already over
     userPickCard(user) {
         if(this.currentUser.uuid !== user.uuid) {
-            user.socket.emit('game-user-error', 'It\'s not your turn');
+            user.socket.emit('game-player-error', 'It\'s not your turn');
             return;
         }
 
@@ -180,6 +180,9 @@ class Room {
         if(card.type == 'bomb') {
             this.isVirusActive = true;
             this.updateBoardInfos('pick', card, user);
+            if(!user.hasCardWithType('defuse')) {
+                this.playerLose(user);
+            }
         }
         else {
             user.addCard(card);
@@ -196,7 +199,7 @@ class Room {
         } else {
             this.currentUser = this.users[index + 1];
         }
-        this.io.to(this.code).emit('game-user-turn', this.currentUser.uuid);
+        this.io.to(this.code).emit('game-player-turn', this.currentUser.uuid);
         this.currentUserNeedToPlayTimes = playTimes;
 
         // TODO
@@ -220,6 +223,24 @@ class Room {
             this.nextUser(this.nextUserNeedToPlayTimes);
             this.nextUserNeedToPlayTimes = 1;
         }
+    }
+
+    
+    playerLose(user) {
+        let index = this.users.indexOf(user);
+        if(index > -1) {
+            this.users.splice(index, 1);
+            this.updateBoardInfos('game-player-lose', undefined, user);
+        }
+        if(this.users.length === 1) {
+            this.gameOver(this.users[0]);
+        }
+    }
+
+
+    gameOver(winner) {
+        this.status = 'ended';
+        this.updateBoardInfos('game-over', undefined, winner);
     }
 
 

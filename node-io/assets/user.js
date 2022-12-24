@@ -36,7 +36,36 @@ class User {
         });
         return card;
     }
+
+    hasCardWithType(type) {
+        let hasCard = false;
+        this.cards.forEach(card => {
+            if(card.type === type) {
+                hasCard = true;
+            }
+        });
+        return hasCard;
+    }
     
+    hasCard(card) {
+        let hasCard = false;
+        this.cards.forEach(c => {
+            if(c.id === card.id) {
+                hasCard = true;
+            }
+        });
+        return hasCard;
+    }
+
+    hasCardWithId(cardId) {
+        let hasCard = false;
+        this.cards.forEach(c => {
+            if(c.id === cardId) {
+                hasCard = true;
+            }
+        });
+        return hasCard;
+    }
 }
 
 module.exports = User;

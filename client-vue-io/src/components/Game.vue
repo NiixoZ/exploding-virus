@@ -161,13 +161,13 @@ export default {
         });
 
 
-        SocketioService.socket.on('game-user-error', (data) => {
-            console.log('game-user-error: ', data);
+        SocketioService.socket.on('game-player-error', (data) => {
+            console.log('game-player-error: ', data);
         });
 
 
         SocketioService.socket.on('game-update-board', (data) => {
-            
+
             // Update player Turn Bar
             let user = getUserForUUID(data.playerTurn);
             deckSize = data.deckSize;
@@ -200,7 +200,7 @@ export default {
 
 
         // User see the future
-        SocketioService.socket.on('game-user-see-the-future', (data) => {
+        SocketioService.socket.on('game-player-see-the-future', (data) => {
             modal.clear();
             modal.setTitle('Dépistage');
             modal.setDescription('Vous avez été dépisté. Vous pouvez voir les 3 prochaines cartes.');
