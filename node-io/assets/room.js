@@ -58,12 +58,14 @@ class Room {
 
 
         user.socket.on('user-pick-card', () => {
-            this1.userPickCard(user);
+            if(this1.status === 'started')
+                this1.userPickCard(user);
         });
 
 
         user.socket.on('user-play-card', (cardIndex) => {
-            this1.userPlayCard(user, cardIndex);
+            if(this1.status === 'started')
+                this1.userPlayCard(user, cardIndex);
         });
 
 
