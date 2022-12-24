@@ -65,6 +65,10 @@ export default {
         let modal = new Modal(true);
 
 
+        /**
+         * Get a user from its uuid
+         * @param {String} uuid 
+         */
         function getUserForUUID(uuid) {
             let user = null;
             this1.$props.users.forEach(u => {
@@ -75,6 +79,10 @@ export default {
             return user;
         }
 
+        /**
+         * Create a card image
+         * @param {Card} card 
+         */
         function createCardItem(card) {
             let img = document.createElement('img');
             img.id = 'card-' + card.id;
@@ -85,6 +93,10 @@ export default {
             return img;
         }
 
+        /**
+         * Add a card to the hand
+         * @param {Card} card 
+         */
         function addCardToList(card) {
             let img = createCardItem(card);
             img.addEventListener('click', function() {
@@ -98,6 +110,10 @@ export default {
         }
 
 
+        /**
+         * Render the cards number for a user
+         * @param {User} user 
+         */
         function addCardNumber(user) {
             let li = document.createElement('li');
             li.id = user.uuid;
@@ -112,6 +128,10 @@ export default {
         }
 
 
+        /**
+         * Increase the number of cards for a user
+         * @param {User} user 
+         */
         function addCardToUser(user) {
             let spanCount = document.querySelector(`[id='${user.uuid}'] .card-count`);
             user.cardsNumber++;
@@ -119,6 +139,10 @@ export default {
         }
 
 
+        /**
+         * Decrease the number of cards for a user
+         * @param {User} user 
+         */
         function removeCardFromUser(user) {
             let spanCount = document.querySelector(`[id='${user.uuid}'] .card-count`);
             user.cardsNumber--;
@@ -126,6 +150,10 @@ export default {
         }
 
 
+        /**
+         * Add a card to the discard pile
+         * @param {Card} card 
+         */
         function addCardToDiscard(card) {
             let img = createCardItem(card);
             // get random rotation
@@ -140,6 +168,9 @@ export default {
         }
 
 
+        /**
+        * Update the deck rendering
+        */
         function updateDeck() {
             document.querySelector('#deck').innerHTML = '';
             for(let i = 0; i < deckSize; i++) {
@@ -153,6 +184,9 @@ export default {
             }
         }
 
+        /*
+         * Update the cards in hands
+         */
         SocketioService.socket.on('game-my-cards', (cards) => {
             document.querySelector('#my-cards').innerHTML = '';
             cards.forEach(c => {
@@ -161,11 +195,17 @@ export default {
         });
 
 
+        /*
+         * Print the error message to the console
+         */
         SocketioService.socket.on('game-player-error', (data) => {
             console.log('game-player-error: ', data);
         });
 
 
+        /*
+         * Update the game board by updating the cards in the deck, the cards in the discard pile, and the number of cards each player has
+         */
         SocketioService.socket.on('game-update-board', (data) => {
 
             // Update player Turn Bar
@@ -174,14 +214,15 @@ export default {
             discardSize = data.discardSize;
             document.querySelector('#turn-info').innerHTML = `It is ${user.username}'s turn`;
 
-            if(data.updateType === 'pick') {
-
-                // Update player card
+            // Update type 'pick'
+            if(data.updateType === 'pick')
+            {
                 addCardToUser(getUserForUUID(data.actionPlayer));
             }
-            else if(data.updateType === 'play') {
 
-                // Update player card
+            // Update type 'play'
+            else if(data.updateType === 'play')
+             {
                 removeCardFromUser(getUserForUUID(data.actionPlayer));
                 addCardToDiscard(data.playedCard);
 
@@ -194,6 +235,19 @@ export default {
                     info.classList.add('alert', 'warning');
                 }
             }
+
+            // Update type 'game-player-lose'
+            else if(data.updateType === 'game-player-lose')
+             {
+                console.log('game-player-lose: ', data);
+            }
+
+            // Update type 'game-over'
+            else if(data.updateType === 'game-over')
+             {
+                console.log('game-over: ', data);
+            }
+            
 
             updateDeck();
         });
