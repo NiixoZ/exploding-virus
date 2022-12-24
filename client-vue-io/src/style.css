@@ -15,6 +15,11 @@
     --background: #0E1014;
 }
 
+* {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+}
+
 body {
     background-color: var(--background);
     color: #fff;
@@ -102,4 +107,141 @@ img {
     bottom: 0;
     right: 0;
     position: absolute;
+}
+
+
+
+.content {
+    width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#my-cards , #card-number, #buttons-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+}
+
+#card-number li {
+    display: flex;
+    gap: 8px;
+}
+
+#my-cards {
+    width: 100vw;
+    left: 0;
+    bottom: 0;
+    padding: 3rem 3rem;
+    overflow: visible;
+    overflow-x: scroll;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+#my-cards::-webkit-scrollbar { /* WebKit */
+    display: none;
+}
+
+#my-cards li {
+    width: 10px;
+    height: 10px;
+    background-color: #3a3a3a;
+    color: white;
+    padding: 6px;
+}
+
+#top, #bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+#center {
+    display: flex;
+    gap: 120px;
+}
+
+#discard, #deck {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 12rem;
+    height: 16rem;
+}
+
+/**
+* The Modal
+*/
+.modal {
+    display: flex;
+    position: fixed; /* Stay in place */
+    z-index: 200; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    backdrop-filter: blur(5px);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modal-body span {
+    display: flex;
+    gap: 16px;
+}
+
+.modal-body h1 {
+    font-size: 2rem;
+    color: white;
+    font-weight: 700;
+    text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.modal-body h3 {
+    font-size: 1.25rem;
+    color: white;
+}
+
+/** Alert **/
+.alert {
+    border-radius: 12px;
+    padding: 24px;
+    gap: 24px;
+    background: #1C1F23;
+    border: 1px solid #24262B;
+}
+
+.alert.success {
+    box-shadow: inset 0px -4px 0px #217E19;
+}
+
+.alert.info {
+    box-shadow: inset 0px -4px 0px #2667B2;
+}
+
+.alert.error {
+    box-shadow: inset 0px -4px 0px #B02828;
+}
+
+.alert.warning {
+    box-shadow: inset 0px -4px 0px #DDB939;
 }

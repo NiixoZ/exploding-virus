@@ -1,12 +1,9 @@
 <template>
-    <div class="content">
+    <div class="content justify-between">
         <div id="top">
-            <div id="room-name">{{ roomName }}</div>
             <div id="turn-info"></div>
-            <div>
-                Cards number:
-                <ul id="card-number"></ul>
-            </div>
+            <div id="info-bar"></div>
+            <ul id="card-number"></ul>
         </div>
 
         <div id="center">
@@ -29,6 +26,7 @@
 
 <script>
 import SocketioService from '../services/socketio.service.js';
+import Modal from '../js/modal.js';
 
 let discardSize = 0;
 let deckSize = 0;
@@ -48,7 +46,6 @@ export default {
     methods: {
         pickCard() {
             SocketioService.socket.emit('user-pick-card', {});
-            console.log('user-pick-card');
         },
         playCard() {
             let selectedCard = document.querySelector('.card-selected');
@@ -57,11 +54,16 @@ export default {
             }
             let cardNumber = selectedCard.id.split('-')[1];
             SocketioService.socket.emit('user-play-card', cardNumber);
-            console.log('user-play-card: ', cardNumber);
         }
     },
     mounted() {
         let this1 = this;
+
+        //*************//
+        // Setup Modal //
+        //*************//
+        let modal = new Modal(true);
+
 
         function getUserForUUID(uuid) {
             let user = null;
@@ -73,13 +75,18 @@ export default {
             return user;
         }
 
-        function addCardToList(card) {
+        function createCardItem(card) {
             let img = document.createElement('img');
             img.id = 'card-' + card.id;
             img.src = process.env.VUE_APP_SOCKET_ENDPOINT + '/card?cardId=' + card.id;
             img.width = '200';
             img.classList.add('card'); 
             img.draggable = false;
+            return img;
+        }
+
+        function addCardToList(card) {
+            let img = createCardItem(card);
             img.addEventListener('click', function() {
                 let selectedCards = document.querySelectorAll('.card-selected');
                 selectedCards.forEach(c => {
@@ -89,6 +96,7 @@ export default {
             });
             document.querySelector('#my-cards').appendChild(img);
         }
+
 
         function addCardNumber(user) {
             let li = document.createElement('li');
@@ -103,11 +111,13 @@ export default {
             document.querySelector('#card-number').appendChild(li);
         }
 
+
         function addCardToUser(user) {
             let spanCount = document.querySelector(`[id='${user.uuid}'] .card-count`);
             user.cardsNumber++;
             spanCount.innerHTML = user.cardsNumber;
         }
+
 
         function removeCardFromUser(user) {
             let spanCount = document.querySelector(`[id='${user.uuid}'] .card-count`);
@@ -115,13 +125,9 @@ export default {
             spanCount.innerHTML = user.cardsNumber;
         }
 
+
         function addCardToDiscard(card) {
-            let img = document.createElement('img');
-            img.id = 'card-' + card.id;
-            img.src = process.env.VUE_APP_SOCKET_ENDPOINT + '/card?cardId=' + card.id;
-            img.width = '200';
-            img.classList.add('card'); 
-            img.draggable = false;
+            let img = createCardItem(card);
             // get random rotation
             let rotation = Math.floor(Math.random() * 15);
             // get random direction
@@ -132,6 +138,7 @@ export default {
             img.style.transform = 'rotate(' + rotation + 'deg) rotateX(48deg) rotateZ(20deg) translateY(-' + 3*discardSize + 'px) translateX(-' + discardSize + 'px)';
             document.querySelector('#discard').appendChild(img);
         }
+
 
         function updateDeck() {
             document.querySelector('#deck').innerHTML = '';
@@ -147,8 +154,6 @@ export default {
         }
 
         SocketioService.socket.on('game-my-cards', (cards) => {
-            console.log('game-my-cards: ', cards);
-            
             document.querySelector('#my-cards').innerHTML = '';
             cards.forEach(c => {
                 addCardToList(c);
@@ -162,13 +167,11 @@ export default {
 
 
         SocketioService.socket.on('game-update-board', (data) => {
-            console.log('game-update-board: ', data);
-
+            
             // Update player Turn Bar
             let user = getUserForUUID(data.playerTurn);
             deckSize = data.deckSize;
             discardSize = data.discardSize;
-
             document.querySelector('#turn-info').innerHTML = `It is ${user.username}'s turn`;
 
             if(data.updateType === 'pick') {
@@ -181,6 +184,15 @@ export default {
                 // Update player card
                 removeCardFromUser(getUserForUUID(data.actionPlayer));
                 addCardToDiscard(data.playedCard);
+
+                let info = document.querySelector('#info-bar');
+                info.innerHTML = '';
+                info.classList.remove('warning', 'error', 'info');
+
+                if(data.playedCard.type === 'shuffle') {
+                    info.innerHTML = 'Le pioche a été mélangé';
+                    info.classList.add('alert', 'warning');
+                }
             }
 
             updateDeck();
@@ -189,7 +201,15 @@ export default {
 
         // User see the future
         SocketioService.socket.on('game-user-see-the-future', (data) => {
-            console.log('game-user-see-the-future: ', data);
+            modal.clear();
+            modal.setTitle('Dépistage');
+            modal.setDescription('Vous avez été dépisté. Vous pouvez voir les 3 prochaines cartes.');
+            data.forEach(c => {
+                let card = createCardItem(c);
+                modal.addContentElement(card)
+            });
+            modal.setCloseText('Fermer');
+            modal.show();
         });
 
 
@@ -201,7 +221,9 @@ export default {
         });
 
 
-        // Setup Horizontal Drag Scroll
+        //******************************//
+        // Setup Horizontal Drag Scroll //
+        //******************************//
         const slider = document.querySelector('#my-cards');
         let isDown = false;
         let startX;
@@ -229,7 +251,6 @@ export default {
             slider.scrollLeft = scrollLeft - walk;
         });
 
-
         SocketioService.socket.emit('user-in-game-view', {});
     },
 }
@@ -237,67 +258,4 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
-.content {
-    width: 100%;
-    height: 100%;
-    max-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-#my-cards , #card-number, #buttons-list {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-}
-
-#my-cards {
-    width: 100vw;
-    left: 0;
-    bottom: 0;
-    padding: 3rem 3rem;
-    overflow: visible;
-    overflow-x: scroll;
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-}
-
-#my-cards::-webkit-scrollbar { /* WebKit */
-    display: none;
-}
-
-#my-cards li {
-    width: 10px;
-    height: 10px;
-    background-color: #3a3a3a;
-    color: white;
-    padding: 6px;
-}
-
-#top, #bottom {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    justify-content: center;
-    align-items: center;
-}
-
-#center {
-    display: flex;
-    gap: 120px;
-}
-
-#discard, #deck {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: 12rem;
-    height: 16rem;
-}
-
 </style>

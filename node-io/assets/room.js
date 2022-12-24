@@ -17,6 +17,7 @@ class Room {
         this.deck = [];
         this.discardedCards = [];
         this.userInView = 0;
+        this.isVirusActive = false;
         console.log('Room created: ', this.code);
     }
 
@@ -126,6 +127,11 @@ class Room {
             return;
         }
 
+        if(this.isVirusActive && card.type !== 'defuse') {
+            user.socket.emit('game-user-error', 'You need to defuse the virus');
+            return;
+        }
+
         card = user.removeCard(cardId);
         if(card === null || card === undefined || card === '') {
             user.socket.emit('game-user-error', 'You don\'t have this card');
@@ -149,7 +155,8 @@ class Room {
             user.socket.emit('game-user-see-the-future', this.deck.slice(0, 3));
         }
         else if(card.type === 'defuse') {
-
+            this.isVirusActive = false;
+            this.currentPlayerPlay();
         }
         else if(card.type === 'nope') {
 
@@ -170,11 +177,15 @@ class Room {
         }
 
         let card = this.deck.shift();
-        user.addCard(card);
-
-        this.updateBoardInfos('pick', undefined, user);
-
-        this.currentPlayerPlay();
+        if(card.type == 'bomb') {
+            this.isVirusActive = true;
+            this.updateBoardInfos('pick', card, user);
+        }
+        else {
+            user.addCard(card);
+            this.currentPlayerPlay();
+            this.updateBoardInfos('pick', undefined, user);
+        }
     }
 
 
