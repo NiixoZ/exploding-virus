@@ -99,12 +99,10 @@ img {
 }
 
 #discard img.card {
-    bottom: 0;
     position: absolute;
 }
 
 #deck img.card {
-    bottom: 0;
     right: 0;
     position: absolute;
 }
@@ -114,9 +112,11 @@ img {
 .content {
     width: 100%;
     height: 100%;
+    overflow: hidden;
     max-height: 100vh;
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 #my-cards , #card-number, #buttons-list {
@@ -134,7 +134,6 @@ img {
 }
 
 #my-cards {
-    width: 100vw;
     left: 0;
     bottom: 0;
     padding: 3rem 3rem;
@@ -159,14 +158,21 @@ img {
 #top, #bottom {
     display: flex;
     flex-direction: column;
-    gap: 8px;
     justify-content: center;
     align-items: center;
+    position: relative;
+    width: 100%;
+}
+
+#top {
+    gap: 8px;
 }
 
 #center {
     display: flex;
-    gap: 120px;
+    flex-direction: row;
+    justify-content: space-evenly;
+    width: 100%;
 }
 
 #discard, #deck {
@@ -175,6 +181,16 @@ img {
     flex-direction: column;
     width: 12rem;
     height: 16rem;
+}
+
+#discard img, #deck img {
+    top: 24px;
+}
+
+#info-bar {
+    position: absolute;
+    bottom: -70px;
+    z-index: 100;
 }
 
 /**
@@ -223,25 +239,25 @@ img {
 
 /** Alert **/
 .alert {
-    border-radius: 12px;
-    padding: 24px;
+    border-radius: 8px;
+    padding: 18px;
     gap: 24px;
     background: #1C1F23;
     border: 1px solid #24262B;
 }
 
 .alert.success {
-    box-shadow: inset 0px -4px 0px #217E19;
+    box-shadow: inset 0px -2px 0px #217E19;
 }
 
 .alert.info {
-    box-shadow: inset 0px -4px 0px #2667B2;
+    box-shadow: inset 0px -2px 0px #2667B2;
 }
 
 .alert.error {
-    box-shadow: inset 0px -4px 0px #B02828;
+    box-shadow: inset 0px -2px 0px #B02828;
 }
 
 .alert.warning {
-    box-shadow: inset 0px -4px 0px #DDB939;
+    box-shadow: inset 0px -2px 0px #DDB939;
 }

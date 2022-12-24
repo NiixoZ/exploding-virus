@@ -84,6 +84,10 @@ io.on('connection', (socket) => {
 
         let user = new User(socket, params.username, io);
         let room = getRoom(params.roomCode);
+        if(room === undefined) {
+            socket.emit('error', 'Room not found');
+            return;
+        }
         room.addUser(user)
         users.push(user);
     });

@@ -1,9 +1,9 @@
 <template>
     <div class="content justify-between">
         <div id="top">
-            <div id="turn-info"></div>
-            <div id="info-bar"></div>
+            <div id="turn-info" class="alert info"></div>
             <ul id="card-number"></ul>
+            <div id="info-bar"></div>
         </div>
 
         <div id="center">
@@ -184,6 +184,49 @@ export default {
             }
         }
 
+
+        /**
+         * Show modal with Virus card
+         * @param {User} uuid 
+         */
+        function playerPickVirus(uuid, virus) {
+            let user = getUserForUUID(uuid);
+            modal.clear();
+            modal.setTitle('VIRUS');
+            modal.setDescription('Le joueur ' + user.username + ' a pioché un virus ! Il doit utiliser un Traitement sinon il perd la partie !');
+            let card = createCardItem(virus);
+            modal.addContentElement(card)
+            modal.setCloseText('Fermer');
+            modal.show();
+        }
+
+        /**
+         * Show modal with player lose
+         * @param {User} uuid 
+         */
+        function playerLose(uuid) {
+            let user = getUserForUUID(uuid);
+            modal.clear();
+            modal.setTitle('PERDU');
+            modal.setDescription('Le joueur ' + user.username + ' a perdu la partie !');
+            modal.setCloseText('Fermer');
+            modal.show();
+        }
+
+
+        /**
+         * Show modal with game over
+         * @param {Use} uuid 
+         */
+        function gameOver(uuid) {
+            let user = getUserForUUID(uuid);
+            modal.clear();
+            modal.setTitle('FIN DE PARTIE');
+            modal.setDescription('Le joueur ' + user.username + ' a gagné la partie !');
+            modal.setCloseText('Fermer');
+            modal.show();
+        }
+
         /*
          * Update the cards in hands
          */
@@ -217,7 +260,12 @@ export default {
             // Update type 'pick'
             if(data.updateType === 'pick')
             {
-                addCardToUser(getUserForUUID(data.actionPlayer));
+                if(data.playedCard !== null) {
+                    playerPickVirus(data.actionPlayer, data.playedCard);
+                }
+                else {
+                    addCardToUser(getUserForUUID(data.actionPlayer));
+                }
             }
 
             // Update type 'play'
@@ -239,13 +287,13 @@ export default {
             // Update type 'game-player-lose'
             else if(data.updateType === 'game-player-lose')
              {
-                console.log('game-player-lose: ', data);
+                playerLose(data.actionPlayer);
             }
 
             // Update type 'game-over'
             else if(data.updateType === 'game-over')
              {
-                console.log('game-over: ', data);
+                gameOver(data.actionPlayer);
             }
             
 
@@ -256,7 +304,7 @@ export default {
         // User see the future
         SocketioService.socket.on('game-player-see-the-future', (data) => {
             modal.clear();
-            modal.setTitle('Dépistage');
+            modal.setTitle('DÉPISTAGE');
             modal.setDescription('Vous avez été dépisté. Vous pouvez voir les 3 prochaines cartes.');
             data.forEach(c => {
                 let card = createCardItem(c);

@@ -17,7 +17,7 @@ class Room {
         this.deck = [];
         this.discardedCards = [];
         this.userInView = 0;
-        this.isVirusActive = false;
+        this.virus = undefined;
         console.log('Room created: ', this.code);
     }
 
@@ -99,14 +99,17 @@ class Room {
 
 
     launchGame() {
+        let defuse = Cards.defuse.slice();
+        this.shuffleCards();
         if(this.status === 'waiting') {
             console.log('Game started: \t', this.code);
             this.status = 'started';
             this.deck = Helper.shuffle(Cards.cards.slice());
             this.users.forEach(user => {
-                for(let i = 0; i < 5; i++) {
+                for(let i = 0; i < 4; i++) {
                     user.addCard(this.deck.shift());
                 }
+                user.addCard(defuse.shift());
             });
             this.io.to(this.code).emit('game-start', this.getGameInfos());
 
@@ -133,8 +136,13 @@ class Room {
             return;
         }
 
-        if(this.isVirusActive && card.type !== 'defuse') {
+        if(this.virus !== undefined && card.type !== 'defuse') {
             user.socket.emit('game-player-error', 'You need to defuse the virus');
+            return;
+        }
+
+        if(this.virus === undefined && card.type === 'defuse') {
+            user.socket.emit('game-player-error', 'No virus to defuse');
             return;
         }
 
@@ -161,7 +169,7 @@ class Room {
             user.socket.emit('game-player-see-the-future', this.deck.slice(0, 3));
         }
         else if(card.type === 'defuse') {
-            this.isVirusActive = false;
+            this.virus = undefined;
             this.currentPlayerPlay();
         }
         else if(card.type === 'nope') {
@@ -182,12 +190,18 @@ class Room {
             return;
         }
 
+        if(this.virus !== undefined) {
+            user.socket.emit('game-player-error', 'You need to defuse the virus');
+            return;
+        }
+
         let card = this.deck.shift();
         if(card.type == 'bomb') {
-            this.isVirusActive = true;
+            this.virus = card;
             this.updateBoardInfos('pick', card, user);
             if(!user.hasCardWithType('defuse')) {
                 this.playerLose(user);
+                this.updateBoardInfos('play', card, user);
             }
         }
         else {
@@ -223,9 +237,9 @@ class Room {
     }
 
 
-    currentPlayerPlay() {
+    currentPlayerPlay(loose = false) {
         this.currentUserNeedToPlayTimes--;
-        if(this.currentUserNeedToPlayTimes === 0) {
+        if(this.currentUserNeedToPlayTimes === 0 || loose) {
             this.nextUser(this.nextUserNeedToPlayTimes);
             this.nextUserNeedToPlayTimes = 1;
         }
@@ -237,6 +251,7 @@ class Room {
         if(index > -1) {
             this.users.splice(index, 1);
             this.updateBoardInfos('game-player-lose', undefined, user);
+            this.currentPlayerPlay(true);
         }
         if(this.users.length === 1) {
             this.gameOver(this.users[0]);

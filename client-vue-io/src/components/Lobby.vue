@@ -1,5 +1,5 @@
 <template>
-    <div class="content gap-6">
+    <div class="content gap-6 justify-center">
         <img alt="Virus Logo" src="../assets/logo.png" width="256">
         <InputText label="Username" name="username" />
         <div class="flex flex-row gap-12">

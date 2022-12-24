@@ -1,5 +1,5 @@
 <template>
-    <div class="content">
+    <div class="content justify-center">
         <div>
             <div class="font-bold">Room</div>
             <div class="bob flex-grow text-center">{{ roomName }}</div>
